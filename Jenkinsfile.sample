@@ -1,0 +1,32 @@
+#!/usr/bin/env groovy
+@Library('jp-devops-shared-library') _
+
+pipeline {
+    agent any
+    stages {
+        stage("build image") {
+            steps {
+                script {
+                    echo "building image"
+                    buildImage()
+                }
+            }
+        }
+        stage("docker Login") {
+            steps {
+                script {
+                    echo "building image"
+                    //gv.buildImage()
+                }
+            }
+        }
+        stage("Push Image") {
+            steps {
+                script {
+                    echo "deploying"
+                    //gv.deployApp()
+                }
+            }
+        }
+    }   
+}
