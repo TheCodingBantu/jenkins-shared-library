@@ -9,7 +9,7 @@ class Docker implements Serializable {
         this.script = script
     }
 
-    def checkoutGitRepo(String sl_repoUrl, String sl_branchName, String sl_credentialsId){
+    def checkoutGitRepo(String repoUrl, String branchName, String credentialsId){
 
       try{
         script.checkout scmGit(
