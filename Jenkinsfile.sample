@@ -3,30 +3,45 @@
 
 pipeline {
     agent any
+
+    environment {
+        IMAGE_NAME = "registry.jambopay.co.ke/sms-poc/your-image:${env.BUILD_NUMBER}"
+    }
+
     stages {
-        stage("build image") {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/your-repo.git'
+            }
+        }
+
+        stage('Build Docker Image') {
             steps {
                 script {
-                    echo "building image"
-                    buildImage()
+                    def docker = new com.example.Docker(this)
+                    docker.buildDockerImage(IMAGE_NAME)
                 }
             }
         }
-        stage("docker Login") {
+
+        stage('Push Docker Image') {
             steps {
                 script {
-                    echo "building image"
-                    //gv.buildImage()
+                    def docker = new com.example.Docker(this)
+                    docker.dockerPush(IMAGE_NAME)
                 }
             }
         }
-        stage("Push Image") {
-            steps {
-                script {
-                    echo "deploying"
-                    //gv.deployApp()
-                }
+    }
+
+    post {
+        always {
+            script {
+                def docker = new com.example.Docker(this)
+                docker.cleanupDockerImage(IMAGE_NAME)
             }
         }
-    }   
+    }
 }
+
+
