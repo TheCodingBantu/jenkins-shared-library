@@ -9,6 +9,15 @@ class Docker implements Serializable {
         this.script = script
     }
 
+    def checkoutGitRepo(String gitUrl, String branchName, String credentialsId){
+
+        script.checkout scmGit(
+                        branches: [[name: '$branchName']],
+                        userRemoteConfigs: [[credentialsId: '$credentialsId',
+                            url: '$GitUrl']])
+    }
+                        
+
     def buildDockerImage(String imageName, String dockerfilePath = '.', String buildArgs = '') {
         try {
             script.echo "Building the Docker image: ${imageName}..."
@@ -43,4 +52,6 @@ class Docker implements Serializable {
             script.echo "Warning: Failed to remove Docker image: ${e.message}"
         }
     }
+
+
 }
