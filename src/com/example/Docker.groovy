@@ -13,9 +13,9 @@ class Docker implements Serializable {
 
       try{
         script.checkout scmGit(
-                        branches: [[name: '$sl_branchName']],
-                        userRemoteConfigs: [[credentialsId: '$sl_credentialsId',
-                            url: '$sl_repoUrl']])
+                        branches: [[name: '$branchName']],
+                        userRemoteConfigs: [[credentialsId: '$credentialsId',
+                            url: '$repoUrl']])
         } catch (Exception e) {
             script.error "${repoUrl} checkout failed"
             throw e
