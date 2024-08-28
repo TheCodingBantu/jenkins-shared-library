@@ -17,7 +17,7 @@ class Docker implements Serializable {
                         userRemoteConfigs: [[credentialsId: '$credentialsId',
                             url: '$repoUrl']])
         } catch (Exception e) {
-            script.error "${repoUrl} checkout failed"
+            script.error "${repoUrl} checkout failed ${e}"
             throw e
         }
 
