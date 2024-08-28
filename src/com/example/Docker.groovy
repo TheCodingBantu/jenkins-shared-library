@@ -9,13 +9,13 @@ class Docker implements Serializable {
         this.script = script
     }
 
-    def checkoutGitRepo(String repoUrl, String branchName, String credentialsId){
+    def checkoutGitRepo(String sl_repoUrl, String sl_branchName, String sl_credentialsId){
 
       try{
         script.checkout scmGit(
-                        branches: [[name: '$branchName']],
-                        userRemoteConfigs: [[credentialsId: '$credentialsId',
-                            url: '$repoUrl']])
+                        branches: [[name: '$sl_branchName']],
+                        userRemoteConfigs: [[credentialsId: '$sl_credentialsId',
+                            url: '$sl_repoUrl']])
         } catch (Exception e) {
             script.error "${repoUrl} checkout failed"
             throw e
