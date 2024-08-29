@@ -10,13 +10,18 @@ class Docker implements Serializable {
     }
 
     def checkoutGitRepo(String gitUrl, String branchName, String credentialsId){
-
+        script.echo "Switching active git repo to : ${gitUrl} and branch ${branchName}"
+        try {
         script.checkout scmGit(
-                        branches: [[name: '$branchName']],
-                        userRemoteConfigs: [[credentialsId: '$credentialsId',
-                            url: '$GitUrl']])
+                        branches: [[name: "${branchName}"]],
+                        userRemoteConfigs: [[credentialsId: "${credentialsId}",
+                            url: "${GitUrl}"]])
+         } catch (Exception e) {
+            script.error "An error occured during checkout ${e.message}"
+            throw e
+        }
     }
-                        
+
 
     def buildDockerImage(String imageName, String dockerfilePath = '.', String buildArgs = '') {
         try {
@@ -53,5 +58,77 @@ class Docker implements Serializable {
         }
     }
 
+    def readOrUpdateVersion(String action = 'read' , String gitRepoUrl,String gitCredsId, String branchName, String versionFile , String defaultVersion ){
+        try{
+            withCredentials([usernamePassword(credentialsId: "${gitCredsId}", passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+
+            def encode = { String value ->
+                java.net.URLEncoder.encode(value, 'UTF-8').replaceAll('\\+', '%20')
+            }
+
+            def encodedUsername = encode(GIT_USERNAME)
+            def encodedPassword = encode(GIT_PASSWORD)
+
+                sh """
+                    git config user.email "jenkins@jambopay.com"
+                    git config user.name "Jenkins"
+                    git remote set-url origin https://${encodedUsername}:${encodedPassword}@${gitRepoUrl}
+                    git fetch origin
+                    git checkout ${branchName}
+                    git pull origin ${branchName}
+                """
+
+            if (fileExists(versionFile)) {
+
+                def currentVersion = readFile(versionFile).trim()
+                if (action =='update'){
+                    return currentVersion;
+                }
+                else if (action =='write'){
+                    //write to file
+                    def versionParts = currentVersion.tokenize('.')
+                    def major = versionParts[0].toInteger()
+                    def minor = versionParts[1].toInteger()
+                    def patch = versionParts[2].toInteger()
+                    patch += 1
+                    def newVersion = "${major}.${minor}.${patch}"
+                    writeFile file: versionFile, text: "${newVersion}"
+
+                    echo "File '${versionFile}' has been persisted with version: ${defaultVersion}"
+                    echo "Pushing version changes to Repository"
+                    sh  """
+                        git add "${versionFile}"
+                        git commit -m "Updated version from ${currentVersion} to: ${newVersion}"
+                        git push origin ${BRANCH_NAME}
+                        echo "Version change committed to ${GIT_URL}, Branch: ${BRANCH_NAME}"
+                    """
+                    echo "Working Version updated to ${newVersion} "
+                }
+            }
+            else{
+               //write the default version
+               if (action == 'read')
+                {
+                   return defaultVersion;
+                }
+                else if(action == 'update'){
+                    sh "mkdir -p \$(dirname ${versionFile})"
+                    writeFile file: versionFile, text: "${defaultVersion}"
+                    echo "File '${versionFile}' has been persisted with version: ${defaultVersion}"
+                    sh  """
+                        git add "${versionFile}"
+                        git commit -m "No previous versions found. Persisted version: ${defaultVersion}"
+                        git push origin ${branchName}
+                        echo "Version change committed to ${GIT_URL}, Branch: ${branchName}"
+                    """
+                }
+
+            }
+
+        }
+        }catch (Exception e) {
+            script.echo "Failed to read Version: ${e.message}"
+        }
+    }
 
 }
