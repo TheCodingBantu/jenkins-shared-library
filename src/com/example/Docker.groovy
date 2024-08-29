@@ -91,11 +91,20 @@ class Docker implements Serializable {
         }
     }
 
-    private def updateVersion(String currentVersion, String versionFile, String branchName) {
-        def versionParts = currentVersion.tokenize('.')
-        def major = versionParts[0].toInteger()
-        def minor = versionParts[1].toInteger()
-        def patch = versionParts[2].toInteger() + 1
+    private def updateVersion(String currentVersion, String versionFile, String branchName, String releaseType) {
+        def (major, minor, patch) = currentVersion.tokenize('.').collect { it.toInteger() }
+
+        switch (releaseType) {
+            case 'major':
+                major++
+                break
+            case 'minor':
+                minor++
+                break
+            case 'patch':
+                patch++
+                break
+        }
         def newVersion = "${major}.${minor}.${patch}"
 
         script.writeFile file: versionFile, text: newVersion
