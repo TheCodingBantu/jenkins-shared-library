@@ -55,7 +55,7 @@ class Docker implements Serializable {
         }
     }
 
-    def readOrUpdateVersion(String action = 'read', String releaseType = 'patch' String gitRepoUrl, String gitCredsId, String branchName, String versionFile, String defaultVersion) {
+    def readOrUpdateVersion(String action = 'read', String releaseType = 'patch' , String gitRepoUrl, String gitCredsId, String branchName, String versionFile, String defaultVersion) {
         try {
             script.withCredentials([script.usernamePassword(credentialsId: gitCredsId, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 def encodedUsername = URLEncoder.encode(script.env.GIT_USERNAME, 'UTF-8').replaceAll('\\+', '%20')
