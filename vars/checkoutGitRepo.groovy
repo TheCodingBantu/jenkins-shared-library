@@ -2,6 +2,6 @@
 
 import com.example.Docker
 
-def call(String gitUrl, String branchName, String credentialsId) {
-    return new Docker(this).checkoutGitRepo(imageName)
+def call(String repoUrl, String branchName, String credentialsId) {
+    return new Docker(this).checkoutGitRepo(repoUrl, branchName, credentialsId)
 }
