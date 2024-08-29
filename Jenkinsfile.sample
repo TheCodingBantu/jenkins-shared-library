@@ -1,4 +1,3 @@
-#!/usr/bin/env groovy
 @Library('jp-devops-shared-library') _
 
 pipeline {
