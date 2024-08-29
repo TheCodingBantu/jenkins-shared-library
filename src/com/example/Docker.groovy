@@ -55,7 +55,7 @@ class Docker implements Serializable {
         }
     }
 
-    def readOrUpdateVersion(String action = 'read', String gitRepoUrl, String gitCredsId, String branchName, String versionFile, String defaultVersion) {
+    def readOrUpdateVersion(String action = 'read', String releaseType = 'patch' String gitRepoUrl, String gitCredsId, String branchName, String versionFile, String defaultVersion) {
         try {
             script.withCredentials([script.usernamePassword(credentialsId: gitCredsId, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 def encodedUsername = URLEncoder.encode(script.env.GIT_USERNAME, 'UTF-8').replaceAll('\\+', '%20')
@@ -75,7 +75,7 @@ class Docker implements Serializable {
                     if (action == 'read') {
                         return currentVersion
                     } else if (action == 'update') {
-                        return updateVersion(currentVersion, versionFile, branchName)
+                        return updateVersion(currentVersion, versionFile, branchName, releaseType)
                     }
                 } else {
                     if (action == 'read') {
@@ -92,20 +92,21 @@ class Docker implements Serializable {
     }
 
     private def updateVersion(String currentVersion, String versionFile, String branchName, String releaseType) {
-        def versionParts = currentVersion.tokenize('.')
-        def major = versionParts[0].toInteger()
-        def minor = versionParts[1].toInteger()
-        def patch = versionParts[2].toInteger()
+        def (major, minor, patch) = currentVersion.tokenize('.').collect { it.toInteger() }
 
-        if (releaseType == 'major'){
-            major ++
+        switch (releaseType) {
+            case 'major':
+                major++
+                break
+            case 'minor':
+                minor++
+                break
+            case 'patch':
+                patch++
+                break
         }
-        else if(releaseType == 'minor'){
-            minor ++
-        }
-        else if (releaseType == 'patch'){
-            patch ++
-        }
+
+
         def newVersion = "${major}.${minor}.${patch}"
 
         script.writeFile file: versionFile, text: newVersion
