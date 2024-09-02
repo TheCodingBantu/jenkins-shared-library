@@ -31,10 +31,10 @@ class Docker implements Serializable {
         }
     }
 
-    def dockerPush(String imageName, String fqdn, String credentialsId, String releaseTag) {
+    def dockerPush(String imageName, String registryUrl, String credentialsId, String releaseTag) {
         try {
-            script.echo "Pushing Docker image ${imageName} to ${fqdn}..."
-            script.docker.withRegistry(fqdn, credentialsId) {
+            script.echo "Pushing Docker image ${imageName} to ${registryUrl}..."
+            script.docker.withRegistry(registryUrl, credentialsId) {
                 script.docker.image(imageName).push(releaseTag)
             }
             script.echo "Docker image ${imageName} pushed successfully."
