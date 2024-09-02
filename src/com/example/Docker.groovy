@@ -23,33 +23,32 @@ class Docker implements Serializable {
     def buildDockerImage(String imageName, String dockerfilePath = '.', String buildArgs = '') {
         try {
             script.echo "Building the Docker image: ${imageName}..."
-            dockerImage = script.docker.build(imageName, "${dockerfilePath} ${buildArgs}")
+            script.docker.build(imageName, "${dockerfilePath} ${buildArgs}")
             script.echo "Docker image ${imageName} built successfully."
-            return dockerImage
         } catch (Exception e) {
             script.error "Failed to build Docker image: ${e.message}"
             throw e
         }
     }
 
-    def dockerPush(Docker image, String registryUrl, String credentialsId, String releaseTag) {
+    def dockerPush(String imageName, String registryUrl, String credentialsId, String releaseTag) {
         try {
-            script.echo "Pushing Docker image ${dockerImage} to ${registryUrl}..."
+            script.echo "Pushing Docker image ${imageName} to ${registryUrl}..."
             script.docker.withRegistry(registryUrl, credentialsId) {
-                image.push(releaseTag)
+                script.docker.image(imageName).push(releaseTag)
             }
-            script.echo "Docker image ${dockerImage} pushed successfully."
+            script.echo "Docker image ${imageName} pushed successfully."
         } catch (Exception e) {
             script.error "Failed to push Docker image: ${e.message}"
             throw e
         }
     }
 
-    def cleanupDockerImage() {
+    def cleanupDockerImage(String imageName) {
         try {
-            script.echo "Cleaning up Docker image ${dockerImage}..."
-            script.sh "docker rmi ${dockerImage}"
-            script.echo "Docker image ${dockerImage} removed successfully."
+            script.echo "Cleaning up Docker image ${imageName}..."
+            script.sh "docker rmi ${imageName}"
+            script.echo "Docker image ${imageName} removed successfully."
         } catch (Exception e) {
             script.echo "Warning: Failed to remove Docker image: ${e.message}"
         }
