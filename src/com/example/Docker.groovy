@@ -33,7 +33,7 @@ class Docker implements Serializable {
 
     def dockerPush(String imageName, String fqdn, String credentialsId, String releaseTag) {
         try {
-            script.echo "Pushing Docker image ${imageName} to ${registryUrl}..."
+            script.echo "Pushing Docker image ${imageName} to ${fqdn}..."
             script.docker.withRegistry(fqdn, credentialsId) {
                 script.docker.image(imageName).push(releaseTag)
             }
