@@ -25,17 +25,18 @@ class Docker implements Serializable {
             script.echo "Building the Docker image: ${imageName}..."
             dockerImage = script.docker.build(imageName, "${dockerfilePath} ${buildArgs}")
             script.echo "Docker image ${imageName} built successfully."
+            return dockerImage
         } catch (Exception e) {
             script.error "Failed to build Docker image: ${e.message}"
             throw e
         }
     }
 
-    def dockerPush(String registryUrl, String credentialsId, String releaseTag) {
+    def dockerPush(Docker image, String registryUrl, String credentialsId, String releaseTag) {
         try {
             script.echo "Pushing Docker image ${dockerImage} to ${registryUrl}..."
             script.docker.withRegistry(registryUrl, credentialsId) {
-                dockerImage.push(releaseTag)
+                image.push(releaseTag)
             }
             script.echo "Docker image ${dockerImage} pushed successfully."
         } catch (Exception e) {
