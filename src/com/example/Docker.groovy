@@ -22,6 +22,12 @@ class Docker implements Serializable {
 
     def buildDockerImage(String imageName, String dockerfilePath = '.', String buildArgs = '') {
         try {
+            //strip protocol in image name if any
+            if (imageName.startsWith("https://")) {
+                imageName = imageName.substring(8)  // Remove the "https://"
+            } else if (imageName.startsWith("http://")) {
+                imageName = imageName.substring(7)  // Remove the "http://"
+            }
             script.echo "Building the Docker image: ${imageName}..."
             script.docker.build(imageName, "${dockerfilePath} ${buildArgs}")
             script.echo "Docker image ${imageName} built successfully."
