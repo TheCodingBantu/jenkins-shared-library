@@ -31,25 +31,24 @@ class Docker implements Serializable {
         }
     }
 
-    def dockerPush(String imageName, String registryUrl = 'https://registry.jambopay.co.ke', String credentialsId = 'registry') {
+    def dockerPush(String registryUrl, String credentialsId, String releaseTag) {
         try {
-            script.echo "Pushing Docker image ${imageName} to ${registryUrl}..."
+            script.echo "Pushing Docker image ${dockerImage.imageName()} to ${registryUrl}..."
             script.docker.withRegistry(registryUrl, credentialsId) {
-                dockerImage.push("latest")
-                dockerImage.push("${script.env.BUILD_NUMBER}")
+                dockerImage.push(releaseTag)
             }
-            script.echo "Docker image ${imageName} pushed successfully."
+            script.echo "Docker image ${dockerImage.imageName()} pushed successfully."
         } catch (Exception e) {
             script.error "Failed to push Docker image: ${e.message}"
             throw e
         }
     }
 
-    def cleanupDockerImage(String imageName) {
+    def cleanupDockerImage() {
         try {
-            script.echo "Cleaning up Docker image ${imageName}..."
-            script.sh "docker rmi ${imageName}"
-            script.echo "Docker image ${imageName} removed successfully."
+            script.echo "Cleaning up Docker image ${dockerImage.imageName()}..."
+            script.sh "docker rmi ${dockerImage.imageName()}"
+            script.echo "Docker image ${dockerImage.imageName()} removed successfully."
         } catch (Exception e) {
             script.echo "Warning: Failed to remove Docker image: ${e.message}"
         }
