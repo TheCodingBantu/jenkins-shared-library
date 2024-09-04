@@ -100,7 +100,7 @@ class Docker implements Serializable {
                     git checkout ${branchName}
                     git pull origin ${branchName}
                 """
-                return updateVersionFile(versionFile,branchName)
+                return updateVersionFile(versionFile,version,branchName)
             }
         } catch (Exception e) {
             script.error "Failed to read or update version: ${e.message}"
