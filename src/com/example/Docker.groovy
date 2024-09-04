@@ -55,7 +55,7 @@ class Docker implements Serializable {
         }
     }
 
-    def readOrUpdateVersion(String action = 'read', String releaseType = 'patch' , String gitRepoUrl, String gitCredsId, String branchName, String versionFile, String defaultVersion) {
+    def readVersion(String releaseType, String gitRepoUrl, String gitCredsId, String branchName, String versionFile, String defaultVersion) {
         try {
             script.withCredentials([script.usernamePassword(credentialsId: gitCredsId, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 def encodedUsername = URLEncoder.encode(script.env.GIT_USERNAME, 'UTF-8').replaceAll('\\+', '%20')
@@ -69,20 +69,15 @@ class Docker implements Serializable {
                     git checkout ${branchName}
                     git pull origin ${branchName}
                 """
+                //calculate and return the new version 
 
                 if (script.fileExists(versionFile)) {
                     def currentVersion = script.readFile(versionFile).trim()
-                    if (action == 'read') {
-                        return currentVersion
-                    } else if (action == 'update') {
-                        return updateVersion(currentVersion, versionFile, branchName, releaseType)
-                    }
+                    return calculateVersion(currentVersion,releaseType) 
+               
                 } else {
-                    if (action == 'read') {
-                        return defaultVersion
-                    } else if (action == 'update') {
-                        return createNewVersionFile(versionFile, defaultVersion, branchName)
-                    }
+                    return calculateVersion(defaultVersion,releaseType)
+                  
                 }
             }
         } catch (Exception e) {
@@ -91,7 +86,29 @@ class Docker implements Serializable {
         }
     }
 
-    private def updateVersion(String currentVersion, String versionFile, String branchName, String releaseType) {
+  def updateVersion(String gitRepoUrl, String gitCredsId, String branchName, String versionFile, String version) {
+        try {
+            script.withCredentials([script.usernamePassword(credentialsId: gitCredsId, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                def encodedUsername = URLEncoder.encode(script.env.GIT_USERNAME, 'UTF-8').replaceAll('\\+', '%20')
+                def encodedPassword = URLEncoder.encode(script.env.GIT_PASSWORD, 'UTF-8').replaceAll('\\+', '%20')
+
+                script.sh """
+                    git config user.email "jenkins@jambopay.com"
+                    git config user.name "Jenkins"
+                    git remote set-url origin https://${encodedUsername}:${encodedPassword}@${gitRepoUrl}
+                    git fetch origin
+                    git checkout ${branchName}
+                    git pull origin ${branchName}
+                """
+                return updateVersionFile(versionFile,branchName)
+            }
+        } catch (Exception e) {
+            script.error "Failed to read or update version: ${e.message}"
+            throw e
+        }
+    }
+
+    private def calculateVersion (String currentVersion,  String releaseType) {
         def (major, minor, patch) = currentVersion.tokenize('.').collect { it.toInteger() }
 
         switch (releaseType) {
@@ -105,33 +122,23 @@ class Docker implements Serializable {
                 patch++
                 break
         }
-
-
         def newVersion = "${major}.${minor}.${patch}"
-
-        script.writeFile file: versionFile, text: newVersion
-        script.echo "Updated version: ${currentVersion} -> ${newVersion}"
-
-        script.sh """
-            git add "${versionFile}"
-            git commit -m "Updated version from ${currentVersion} to ${newVersion}"
-            git push origin ${branchName}
-        """
-
         return newVersion
     }
 
-    private def createNewVersionFile(String versionFile, String defaultVersion, String branchName) {
-        script.sh "mkdir -p \$(dirname ${versionFile})"
-        script.writeFile file: versionFile, text: defaultVersion
-        script.echo "Created new version file with version: ${defaultVersion}"
-
+    private def updateVersionFile(String versionFile, String version, String branchName) {
+        //if dir doesnt exist
+        if (!script.fileExists(versionFile)) {
+           script.sh "mkdir -p \$(dirname ${versionFile})"
+         
+        } 
+        script.writeFile file: versionFile, text: version
+        script.echo "Created new version file with version: ${version}"
         script.sh """
             git add "${versionFile}"
-            git commit -m "No previous versions found. Persisted version: ${defaultVersion}"
+            git commit -m "Update version to : ${version}"
             git push origin ${branchName}
         """
-
-        return defaultVersion
+        return version
     }
 }
