@@ -48,7 +48,7 @@ class Docker implements Serializable {
     def cleanupDockerImage(String imageName) {
         try {
             script.echo "Cleaning up Docker image ${imageName}..."
-            script.sh "docker rmi $(docker images ${imageName} -a -q)"
+            script.sh "docker rmi \$(docker images ${imageName} -a -q)"
             script.echo "Docker image ${imageName} removed successfully."
         } catch (Exception e) {
             script.echo "Warning: Failed to remove Docker image: ${e.message}"
