@@ -89,6 +89,8 @@ class Docker implements Serializable {
 
   def updateVersion(String gitRepoUrl, String gitCredsId, String branchName, String versionFile, String version) {
         try {
+            //try to stash if previous stages had changed anything
+            script.sh "git stash"
             script.withCredentials([script.usernamePassword(credentialsId: gitCredsId, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 def encodedUsername = URLEncoder.encode(script.env.GIT_USERNAME, 'UTF-8').replaceAll('\\+', '%20')
                 def encodedPassword = URLEncoder.encode(script.env.GIT_PASSWORD, 'UTF-8').replaceAll('\\+', '%20')
