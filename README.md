@@ -3,7 +3,7 @@
 Usage:
  - Import shared libary in your jenkinsfile
     ```
-        @Library('jp-devops-shared-library') _
+        @Library('jenkins-shared-library') _
 
     ```
 Methods:
