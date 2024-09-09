@@ -30,9 +30,7 @@ class Helm implements Serializable {
                     git config user.email "jenkins@jambopay.com"
                     git config user.name "Jenkins"
                     git remote set-url origin https://${encodedUsername}:${encodedPassword}@${strippedUrl}
-                    git fetch origin
                     git checkout ${branchName}
-                    git pull origin ${branchName}
                     git add "${chartPath}"
                     git commit -m "committed chart version updates"
                     git push origin ${branchName}
