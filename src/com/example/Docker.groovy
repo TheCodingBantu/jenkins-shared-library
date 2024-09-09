@@ -66,7 +66,7 @@ class Docker implements Serializable {
                 def encodedPassword = URLEncoder.encode(script.env.GIT_PASSWORD, 'UTF-8').replaceAll('\\+', '%20')
 
                 script.sh """
-                    git config user.email "jenkins@jambopay.com"
+                    git config user.email "jenkins@jenkins.com"
                     git config user.name "Jenkins"
                     git remote set-url origin https://${encodedUsername}:${encodedPassword}@${gitRepoUrl}
                     git fetch origin
@@ -99,7 +99,7 @@ class Docker implements Serializable {
                 def encodedPassword = URLEncoder.encode(script.env.GIT_PASSWORD, 'UTF-8').replaceAll('\\+', '%20')
 
                 script.sh """
-                    git config user.email "jenkins@jambopay.com"
+                    git config user.email "jenkins@jenkins.com"
                     git config user.name "Jenkins"
                     git remote set-url origin https://${encodedUsername}:${encodedPassword}@${gitRepoUrl}
                     git fetch origin
