@@ -6,7 +6,7 @@ class Helm implements Serializable {
     Helm(script) {
         this.script = script
     }
-    def dockerPush(String chartName, String registryUrl, registryCreds, String helmRepo) {
+    def helmPush(String chartName, String registryUrl, registryCreds, String helmRepo) {
         try {
             //we can use docker registry
               script.docker.withRegistry(registryUrl, registryCreds) {
