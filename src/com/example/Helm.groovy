@@ -11,12 +11,35 @@ class Helm implements Serializable {
             //we can use docker registry
               script.docker.withRegistry(registryUrl, registryCreds) {
                 def strippedUrl = registryUrl.replaceAll(/^https?:\/\//, '')
-                script.echo "${strippedUrl}"
                script.sh "helm push ${chartName} oci://${strippedUrl}/${helmRepo}"
             }
 
             } catch (Exception e) {
                 throw e
+        }
+    }
+    def commitHelmChanges(String gitRepoUrl, String gitCredsId, String branchName, String chartPath) {
+        try {
+            //try to stash if previous stages had changed anything
+            script.sh "git stash"
+            script.withCredentials([script.usernamePassword(credentialsId: gitCredsId, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                def encodedUsername = URLEncoder.encode(script.env.GIT_USERNAME, 'UTF-8').replaceAll('\\+', '%20')
+                def encodedPassword = URLEncoder.encode(script.env.GIT_PASSWORD, 'UTF-8').replaceAll('\\+', '%20')
+                script.sh """
+                    git config user.email "jenkins@jambopay.com"
+                    git config user.name "Jenkins"
+                    git remote set-url origin https://${encodedUsername}:${encodedPassword}@${gitRepoUrl}
+                    git fetch origin
+                    git checkout ${branchName}
+                    git pull origin ${branchName}
+                    git add "${chartPath}"
+                    git commit -m "committed chart version updates"
+                    git push origin ${branchName}
+                """
+            }
+        } catch (Exception e) {
+            script.error "Failed to read or update version: ${e.message}"
+            throw e
         }
     }
 }
