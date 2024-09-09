@@ -25,10 +25,11 @@ class Helm implements Serializable {
             script.withCredentials([script.usernamePassword(credentialsId: gitCredsId, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 def encodedUsername = URLEncoder.encode(script.env.GIT_USERNAME, 'UTF-8').replaceAll('\\+', '%20')
                 def encodedPassword = URLEncoder.encode(script.env.GIT_PASSWORD, 'UTF-8').replaceAll('\\+', '%20')
+                def strippedUrl = gitRepoUrl.replaceAll(/^https?:\/\//, '')
                 script.sh """
                     git config user.email "jenkins@jambopay.com"
                     git config user.name "Jenkins"
-                    git remote set-url origin https://${encodedUsername}:${encodedPassword}@${gitRepoUrl}
+                    git remote set-url origin https://${encodedUsername}:${encodedPassword}@${strippedUrl}
                     git fetch origin
                     git checkout ${branchName}
                     git pull origin ${branchName}
