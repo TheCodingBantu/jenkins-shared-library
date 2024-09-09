@@ -13,7 +13,7 @@ class Helm implements Serializable {
                  def strippedUrl = registryUrl.replaceAll(/^https?:\/\//, '')
                  script.sh """
                     helm repo add ${helmRepo} ${strippedUrl} --namespace=${namespace}
-                    helm install prsp-website oci://registry.jambopay.co.ke/sms-helm/prsp-website --version 17.4.7 --namespace=sms-poc
+                    helm install prsp-website oci://registry.jenkins.com/sms-helm/prsp-website --version 17.4.7 --namespace=sms-poc
                     helm repo update
                 """
             }
@@ -43,7 +43,7 @@ class Helm implements Serializable {
                 def encodedPassword = URLEncoder.encode(script.env.GIT_PASSWORD, 'UTF-8').replaceAll('\\+', '%20')
                 def strippedUrl = gitRepoUrl.replaceAll(/^https?:\/\//, '')
                 script.sh """
-                    git config user.email "jenkins@jambopay.com"
+                    git config user.email "jenkins@jenkins.com"
                     git config user.name "Jenkins"
                     git remote set-url origin https://${encodedUsername}:${encodedPassword}@${strippedUrl}
                     git checkout ${branchName}
