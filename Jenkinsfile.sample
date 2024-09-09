@@ -4,7 +4,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "registry.jambopay.co.ke/sms-poc/your-image:${env.BUILD_NUMBER}"
+        IMAGE_NAME = "registry.com/repo-name/your-image:${env.BUILD_NUMBER}"
     }
 
     stages {
