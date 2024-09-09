@@ -1,4 +1,4 @@
-**Jambopay Jenkins Shared Libaries**
+**Jenkins Shared Libaries**
 
 Usage:
  - Import shared libary in your jenkinsfile
