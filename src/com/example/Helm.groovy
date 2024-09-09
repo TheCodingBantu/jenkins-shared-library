@@ -6,12 +6,29 @@ class Helm implements Serializable {
     Helm(script) {
         this.script = script
     }
+
+    def helmAddRepo(String registryUrl, String registryCreds, String helmRepo, String namespace ){
+        try {
+              script.docker.withRegistry(registryUrl, registryCreds) {
+                 def strippedUrl = registryUrl.replaceAll(/^https?:\/\//, '')
+                 script.sh """
+                    helm repo add ${helmRepo} ${strippedUrl} --namespace=${namespace}
+                    helm install prsp-website oci://registry.jambopay.co.ke/sms-helm/prsp-website --version 17.4.7 --namespace=sms-poc
+                    helm repo update
+                """
+            }
+
+            } catch (Exception e) {
+                throw e
+        }
+    }
+
     def helmPush(String chartName, String registryUrl, registryCreds, String helmRepo) {
         try {
             //we can use docker registry
               script.docker.withRegistry(registryUrl, registryCreds) {
                 def strippedUrl = registryUrl.replaceAll(/^https?:\/\//, '')
-               script.sh "helm push ${chartName} oci://${strippedUrl}/${helmRepo}"
+                script.sh "helm push ${chartName} oci://${strippedUrl}/${helmRepo}"
             }
 
             } catch (Exception e) {

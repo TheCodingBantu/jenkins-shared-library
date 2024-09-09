@@ -21,7 +21,10 @@ class Docker implements Serializable {
         }
     }
 
-    def buildDockerImage(String imageName, String dockerfilePath = '.', String buildArgs = '') {
+    def buildDockerImage(String imageName, String dockerfilePat sh """
+                    helm repo add ${HELM_REPO_NAME} ${HELM_REPO_URL} --username ${HELM_REPO_USERNAME} --password ${HELM_REPO_PASSWORD}
+                    helm repo update
+                    """h = '.', String buildArgs = '') {
         try {
    
             script.echo "Building the Docker image: ${imageName}..."
